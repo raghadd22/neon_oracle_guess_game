@@ -1,4 +1,4 @@
-# Neon Oracle — Mind-Blowing Guess the Number Game
+# Neon Oracle — Guess the Number Game
 
 Neon Oracle is an upgraded smart version of the classic **Guess the Number** game.  
 It includes a futuristic neon interface, AI-style hints, live analytics, sound effects, achievements, leaderboard, animated background, and confetti victory effects.
