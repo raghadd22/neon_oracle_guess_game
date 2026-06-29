@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A mind-blowing smart Guess the Number game with AI hints, leaderboard, sounds, achievements, and neon UI." />
+  <title>Neon Oracle — Guess the Number</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="dark">
+  <canvas id="starsCanvas" aria-hidden="true"></canvas>
+  <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+  <div class="ambient ambient-three"></div>
+
+  <main class="app-shell">
+    <section class="hero-panel">
+      <nav class="topbar" aria-label="Game controls">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </div>
+          <div>
+            <p class="eyebrow">Smart Number Lab</p>
+            <h1>Neon Oracle</h1>
+          </div>
+        </div>
+
+        <div class="control-pill">
+          <button id="themeToggle" class="icon-btn" type="button" aria-label="Toggle theme">🌙</button>
+          <button id="musicToggle" class="icon-btn" type="button" aria-label="Toggle music">🔇</button>
+          <button id="soundToggle" class="icon-btn" type="button" aria-label="Toggle sound effects">🔔</button>
+        </div>
+      </nav>
+
+      <div class="hero-grid">
+        <div class="intro-card">
+          <p class="eyebrow">AI-powered guessing arena</p>
+          <h2>Guess the hidden number before your energy runs out.</h2>
+          <p class="intro-text">
+            Every guess teaches the Oracle. It narrows the range, measures heat, reads patterns,
+            and gives smarter hints while your score, streak, and leaderboard update live.
+          </p>
+
+          <div class="difficulty-grid" id="difficultyCards" aria-label="Select difficulty">
+            <button class="difficulty-card" data-difficulty="rookie" type="button">
+              <span>Rookie</span>
+              <strong>1–25</strong>
+              <small>6 energy</small>
+            </button>
+            <button class="difficulty-card active" data-difficulty="classic" type="button">
+              <span>Classic</span>
+              <strong>1–100</strong>
+              <small>7 energy</small>
+            </button>
+            <button class="difficulty-card" data-difficulty="expert" type="button">
+              <span>Expert</span>
+              <strong>1–500</strong>
+              <small>8 energy</small>
+            </button>
+            <button class="difficulty-card danger" data-difficulty="nightmare" type="button">
+              <span>Nightmare</span>
+              <strong>1–1000</strong>
+              <small>9 energy</small>
+            </button>
+          </div>
+
+          <div class="quick-stats">
+            <div>
+              <span id="gamesPlayed">0</span>
+              <p>Games</p>
+            </div>
+            <div>
+              <span id="winsCount">0</span>
+              <p>Wins</p>
+            </div>
+            <div>
+              <span id="winStreak">0</span>
+              <p>Streak</p>
+            </div>
+            <div>
+              <span id="bestScore">0</span>
+              <p>Best Score</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="oracle-card">
+          <div class="oracle-glow" aria-hidden="true"></div>
+          <div class="orbital-ring ring-a" aria-hidden="true"></div>
+          <div class="orbital-ring ring-b" aria-hidden="true"></div>
+
+          <div class="number-core">
+            <span id="coreSymbol">?</span>
+            <small id="coreStatus">LOCKED</small>
+          </div>
+
+          <div class="heat-meter" aria-label="Guess heat meter">
+            <div class="heat-fill" id="heatFill"></div>
+          </div>
+
+          <p id="oracleLine" class="oracle-line">
+            Choose your difficulty and send your first guess.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="game-layout">
+      <article class="game-card">
+        <div class="card-header">
+          <div>
+            <p class="eyebrow">Current Mission</p>
+            <h2 id="rangeText">Number range: 1–100</h2>
+          </div>
+          <div class="score-badge">
+            <span id="liveScore">0</span>
+            <small>score</small>
+          </div>
+        </div>
+
+        <div class="energy-row">
+          <div>
+            <p class="tiny-label">Energy</p>
+            <div id="livesContainer" class="energy"></div>
+          </div>
+          <div>
+            <p class="tiny-label">Attempts</p>
+            <strong id="attemptsText">0</strong>
+          </div>
+          <div>
+            <p class="tiny-label">Accuracy</p>
+            <strong id="accuracyText">—</strong>
+          </div>
+        </div>
+
+        <div class="range-visual">
+          <div class="range-track">
+            <div id="rangeWindow" class="range-window"></div>
+            <div id="guessMarker" class="guess-marker"></div>
+          </div>
+          <div class="range-labels">
+            <span id="rangeMin">1</span>
+            <span id="rangeMax">100</span>
+          </div>
+        </div>
+
+        <div class="input-zone">
+          <input id="guessInput" type="number" inputmode="numeric" placeholder="Enter your guess" autocomplete="off" />
+          <button id="guessBtn" class="primary-action" type="button">
+            <span>Launch Guess</span>
+            <b>↵</b>
+          </button>
+        </div>
+
+        <div class="button-row">
+          <button id="hintBtn" class="ghost-btn" type="button">🧠 Ask Oracle</button>
+          <button id="resetBtn" class="ghost-btn" type="button">🔄 New Round</button>
+          <button id="revealBtn" class="ghost-btn danger-btn" type="button">👁 Reveal</button>
+        </div>
+
+        <div class="message-box" id="messageBox">
+          <strong id="message">Ready.</strong>
+          <p id="hint">The Oracle is waiting for your first move.</p>
+        </div>
+
+        <div class="history-panel">
+          <div class="section-title">
+            <h3>Guess Timeline</h3>
+            <span id="historyCount">0 moves</span>
+          </div>
+          <div id="guessHistory" class="guess-history"></div>
+        </div>
+      </article>
+
+      <aside class="side-column">
+        <article class="ai-card">
+          <div class="section-title">
+            <h3>🧠 AI Organizer</h3>
+            <span id="riskTag">Standby</span>
+          </div>
+          <p id="aiInsight">
+            I will analyze your guesses and recommend the smartest next range.
+          </p>
+          <div class="ai-grid">
+            <div>
+              <small>Possible Range</small>
+              <strong id="possibleRange">1–100</strong>
+            </div>
+            <div>
+              <small>Best Next Guess</small>
+              <strong id="bestNextGuess">50</strong>
+            </div>
+            <div>
+              <small>Pattern</small>
+              <strong id="patternText">None</strong>
+            </div>
+            <div>
+              <small>Confidence</small>
+              <strong id="confidenceText">0%</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="achievements-card">
+          <div class="section-title">
+            <h3>✨ Achievements</h3>
+            <span id="achievementProgress">0/5</span>
+          </div>
+          <div id="achievements" class="achievements"></div>
+        </article>
+
+        <article class="leaderboard-card">
+          <div class="section-title">
+            <h3>🏆 Leaderboard</h3>
+            <button id="clearLeaderboard" class="mini-btn" type="button">Clear</button>
+          </div>
+          <div class="leaderboard-list" id="leaderboardList"></div>
+        </article>
+      </aside>
+    </section>
+
+    <footer class="footer">
+      <span>Made by Raghad</span>
+      <span>•</span>
+      <span>Neon Oracle Guess Game</span>
+    </footer>
+  </main>
+
+  <div id="winModal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <button id="closeModal" class="modal-close" type="button" aria-label="Close">×</button>
+      <p class="eyebrow">Victory unlocked</p>
+      <h2>You cracked the Oracle.</h2>
+      <p id="finalResult">Score: 0</p>
+      <input id="playerName" type="text" maxlength="20" placeholder="Enter your name for the leaderboard" />
+      <button id="saveScoreBtn" class="primary-action" type="button">Save Score</button>
+    </div>
+  </div>
+
+  <audio id="winSound" src="winSound.mp3" preload="auto"></audio>
+  <audio id="clickSound" src="clickSound.mp3" preload="auto"></audio>
+  <audio id="bgMusic" src="background.mp3" loop preload="auto"></audio>
+
+  <script src="script.js"></script>
+</body>
+</html>
